@@ -1,0 +1,49 @@
+---
+- name: Installer Nginx (Debian)
+  ansible.builtin.apt:
+    name: nginx
+    state: present
+    update_cache: true
+  when: ansible_facts['os_family'] == "Debian"
+
+- name: Installer Nginx (Rocky)
+  ansible.builtin.dnf:
+    name: nginx
+    state: present
+  when: ansible_facts['os_family'] == "RedHat"
+
+- name: Déployer la page d'accueil
+  ansible.builtin.copy:
+    content: |
+      <html>
+      <head><title>Bienvenue sur {{ ansible_facts['hostname'] }}</title></head>
+      <body>
+        <h1>Serveur {{ ansible_facts['hostname'] }} configuré par Ansible</h1>
+        <p>OS : {{ ansible_facts['distribution'] }} {{ ansible_facts['distribution_version'] }}</p>
+        <p>Rôle : serveur web</p>
+      </body>
+      </html>
+    dest: /var/www/html/index.html
+    mode: '0644'
+  notify: Restart Nginx
+
+- name: Démarrer et activer Nginx
+  ansible.builtin.service:
+    name: nginx
+    state: started
+    enabled: true
+
+- name: Ouvrir le port 80 (Debian UFW)
+  community.general.ufw:
+    rule: allow
+    port: "{{ webserver_port }}"
+    proto: tcp
+  when: ansible_facts['os_family'] == "Debian"
+
+- name: Ouvrir le port 80 (Rocky firewalld)
+  ansible.posix.firewalld:
+    port: "{{ webserver_port }}/tcp"
+    permanent: true
+    state: enabled
+    immediate: true
+  when: ansible_facts['os_family'] == "RedHat"
