@@ -1,0 +1,5 @@
+---
+common_timezone: "Indian/Antananarivo"
+common_ssh_port: 22
+common_ssh_permit_root: "no"
+common_ssh_password_auth: "no"

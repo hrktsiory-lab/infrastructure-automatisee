@@ -1,0 +1,74 @@
+---
+- name: Définir le fuseau horaire
+  community.general.timezone:
+    name: "{{ common_timezone }}"
+
+- name: Installer les paquets de base (Debian)
+  ansible.builtin.apt:
+    name:
+      - chrony
+      - ufw
+      - unattended-upgrades
+    state: present
+    update_cache: true
+  when: ansible_facts['os_family'] == "Debian"
+
+- name: Installer les paquets de base (Rocky)
+  ansible.builtin.dnf:
+    name:
+      - chrony
+      - firewalld
+      - dnf-automatic
+    state: present
+  when: ansible_facts['os_family'] == "RedHat"
+
+- name: Activer et démarrer chrony
+  ansible.builtin.service:
+    name: chronyd
+    state: started
+    enabled: true
+
+- name: Durcir SSH - PermitRootLogin
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^#?PermitRootLogin'
+    line: "PermitRootLogin {{ common_ssh_permit_root }}"
+    validate: 'sshd -t -f %s'
+  notify: Restart SSH
+
+- name: Durcir SSH - PasswordAuthentication
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^#?PasswordAuthentication'
+    line: "PasswordAuthentication {{ common_ssh_password_auth }}"
+    validate: 'sshd -t -f %s'
+  notify: Restart SSH
+
+- name: Activer UFW (Debian)
+  community.general.ufw:
+    state: enabled
+    policy: deny
+    direction: incoming
+  when: ansible_facts['os_family'] == "Debian"
+
+- name: Autoriser SSH via UFW (Debian)
+  community.general.ufw:
+    rule: allow
+    port: "{{ common_ssh_port }}"
+    proto: tcp
+  when: ansible_facts['os_family'] == "Debian"
+
+- name: Activer firewalld (Rocky)
+  ansible.builtin.service:
+    name: firewalld
+    state: started
+    enabled: true
+  when: ansible_facts['os_family'] == "RedHat"
+
+- name: Autoriser SSH via firewalld (Rocky)
+  ansible.posix.firewalld:
+    service: ssh
+    permanent: true
+    state: enabled
+    immediate: true
+  when: ansible_facts['os_family'] == "RedHat"
