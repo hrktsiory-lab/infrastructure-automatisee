@@ -1,0 +1,24 @@
+---
+- name: Socle commun sur tous les serveurs
+  hosts: all
+  become: true
+  roles:
+    - common
+
+- name: Configuration du serveur web
+  hosts: web
+  become: true
+  roles:
+    - webserver
+
+- name: Configuration de la base de données
+  hosts: bdd
+  become: true
+  roles:
+    - database
+
+- name: Configuration du serveur de fichiers
+  hosts: fichiers
+  become: true
+  roles:
+    - fileserver
