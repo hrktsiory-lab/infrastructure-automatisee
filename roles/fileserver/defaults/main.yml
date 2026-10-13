@@ -1,0 +1,4 @@
+---
+samba_share_name: "partage"
+samba_share_path: "/srv/partage"
+samba_group: "partage"

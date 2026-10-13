@@ -1,0 +1,64 @@
+---
+- name: Installer Samba (Debian)
+  ansible.builtin.apt:
+    name: samba
+    state: present
+    update_cache: true
+  when: ansible_facts['os_family'] == "Debian"
+
+- name: Installer Samba (Rocky)
+  ansible.builtin.dnf:
+    name: samba
+    state: present
+  when: ansible_facts['os_family'] == "RedHat"
+
+- name: Créer le groupe partage
+  ansible.builtin.group:
+    name: "{{ samba_group }}"
+    state: present
+
+- name: Créer le dossier partagé
+  ansible.builtin.file:
+    path: "{{ samba_share_path }}"
+    state: directory
+    owner: root
+    group: "{{ samba_group }}"
+    mode: '0770'
+
+- name: Configurer le partage Samba
+  ansible.builtin.blockinfile:
+    path: /etc/samba/smb.conf
+    block: |
+      [{{ samba_share_name }}]
+         path = {{ samba_share_path }}
+         browseable = yes
+         read only = no
+         valid users = @{{ samba_group }}
+         force group = {{ samba_group }}
+         create mask = 0660
+         directory mask = 0770
+  notify: Restart Samba
+
+- name: Démarrer et activer Samba
+  ansible.builtin.service:
+    name: "{{ 'smbd' if ansible_facts['os_family'] == 'Debian' else 'smb' }}"
+    state: started
+    enabled: true
+
+- name: Ouvrir les ports Samba (Debian UFW)
+  community.general.ufw:
+    rule: allow
+    port: "{{ item }}"
+    proto: tcp
+  loop:
+    - "139"
+    - "445"
+  when: ansible_facts['os_family'] == "Debian"
+
+- name: Ouvrir les ports Samba (Rocky firewalld)
+  ansible.posix.firewalld:
+    service: samba
+    permanent: true
+    state: enabled
+    immediate: true
+  when: ansible_facts['os_family'] == "RedHat"

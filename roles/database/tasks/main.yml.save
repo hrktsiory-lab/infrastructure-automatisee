@@ -1,0 +1,55 @@
+---
+- name: Installer MariaDB (Debian)
+  ansible.builtin.apt:
+    name:
+      - mariadb-server
+      - python3-pymysql
+    state: present
+    update_cache: true
+  when: ansible_facts['os_family'] == "Debian"
+
+- name: Installer MariaDB (Rocky)
+  ansible.builtin.dnf:
+    name:
+      - mariadb-server
+      - python3-PyMySQL
+    state: present
+  when: ansible_facts['os_family'] == "RedHat"
+
+- name: Démarrer et activer MariaDB
+  ansible.builtin.service:
+    name: mariadb
+    state: started
+    enabled: true
+
+- name: Créer la base de données
+  ansible.mysql.mysql_db
+    name: "{{ db_name }}"
+    state: present
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+
+- name: Créer l'utilisateur de la base
+  ansible.mysql.mysql_user:
+    name: "{{ db_user }}"
+    password: "{{ db_password }}"
+    host: "{{ db_allowed_host }}"
+    priv: "{{ db_name }}.*:ALL"
+    state: present
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+
+- name: Ouvrir le port 3306 (Debian UFW)
+  community.general.ufw:
+    rule: allow
+    port: "3306"
+    proto: tcp
+    from_ip: "192.168.3.0/24"
+  when: ansible_facts['os_family'] == "Debian"
+
+- name: Ouvrir le port 3306 (Rocky firewalld)
+  ansible.posix.firewalld:
+    port: "3306/tcp"
+    permanent: true
+    state: enabled
+    immediate: true
+    zone: public
+  when: ansible_facts['os_family'] == "RedHat"

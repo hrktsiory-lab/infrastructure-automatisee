@@ -1,0 +1,6 @@
+---
+- name: Configurer la base de données
+  hosts: bdd
+  become: true
+  roles:
+    - database

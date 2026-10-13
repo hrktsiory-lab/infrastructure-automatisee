@@ -1,0 +1,6 @@
+---
+- name: Configurer le serveur de fichiers
+  hosts: fichiers
+  become: true
+  roles:
+    - fileserver
