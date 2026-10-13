@@ -5,3 +5,5 @@
 group_vars/all/vault.yml
 *.swp
 .DS_Store
+*.save
+*.bak
