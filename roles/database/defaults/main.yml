@@ -1,5 +1,5 @@
 ---
 db_name: "stageIT"
 db_user: "dracarys"
-db_password: "011024A&T"
+db_password: "{{ vault_db_password }}"
 db_allowed_host: "192.168.3.%"
