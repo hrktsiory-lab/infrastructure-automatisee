@@ -1,0 +1,6 @@
+---
+- name: Audit de sécurité Lynis
+  hosts: all
+  become: true
+  roles:
+    - lynis

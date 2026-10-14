@@ -1,0 +1,29 @@
+---
+- name: Installer Lynis (Debian)
+  ansible.builtin.apt:
+    name: lynis
+    state: present
+    update_cache: true
+  when: ansible_facts['os_family'] == "Debian"
+
+- name: Installer Lynis (Rocky)
+  ansible.builtin.dnf:
+    name: lynis
+    state: present
+  when: ansible_facts['os_family'] == "RedHat"
+
+- name: Lancer l'audit Lynis
+  ansible.builtin.command:
+    cmd: lynis audit system --quick --no-colors
+  register: lynis_output
+  changed_when: false
+
+- name: Afficher le score Lynis
+  ansible.builtin.debug:
+    msg: "{{ lynis_output.stdout_lines | select('search', 'Hardening index') | list }}"
+
+- name: Sauvegarder le rapport Lynis
+  ansible.builtin.copy:
+    content: "{{ lynis_output.stdout }}"
+    dest: "/tmp/lynis-report-{{ ansible_facts['hostname'] }}.txt"
+    mode: '0644'
