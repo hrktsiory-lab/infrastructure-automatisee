@@ -1,0 +1,17 @@
+=== AUDIT LYNIS - SYNTHÈSE ===
+Date : 2026-10-14
+Socle de sécurité : appliqué via Ansible
+
+VM               OS              Hardening Index
+------------------------------------------------
+server-web       Debian 12       65
+server-db        Debian 12       65
+server-fs        Rocky Linux 9   68
+server-app       Rocky Linux 9   68
+
+Moyenne : 66.5 / 100
+
+AMÉLIORATION ESTIMÉE vs AVANT :
+- Avant socle : ~45-55 (estimation)
+- Après socle : 65-68 (mesuré)
+- Gain : +10 à +23 points

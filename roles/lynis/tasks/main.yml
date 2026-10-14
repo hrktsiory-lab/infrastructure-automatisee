@@ -6,6 +6,12 @@
     update_cache: true
   when: ansible_facts['os_family'] == "Debian"
 
+- name: Installer EPEL (Rocky)
+  ansible.builtin.dnf:
+    name: epel-release
+    state: present
+  when: ansible_facts['os_family'] == "RedHat"
+
 - name: Installer Lynis (Rocky)
   ansible.builtin.dnf:
     name: lynis
@@ -25,5 +31,5 @@
 - name: Sauvegarder le rapport Lynis
   ansible.builtin.copy:
     content: "{{ lynis_output.stdout }}"
-    dest: "/tmp/lynis-report-{{ ansible_facts['hostname'] }}.txt"
+    dest: "/tmp/lynis-report-{{ inventory_hostname }}.txt"
     mode: '0644'
