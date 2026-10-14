@@ -2,5 +2,7 @@
 - name: Configurer la base de données
   hosts: bdd
   become: true
+  vars_files:
+    - ../group_vars/all/vault.yml
   roles:
     - database

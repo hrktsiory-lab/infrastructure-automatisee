@@ -2,23 +2,31 @@
 - name: Socle commun sur tous les serveurs
   hosts: all
   become: true
+  vars_files:
+    - ../group_vars/all/vault.yml
   roles:
     - common
 
 - name: Configuration du serveur web
   hosts: web
   become: true
+  vars_files:
+    - ../group_vars/all/vault.yml
   roles:
     - webserver
 
 - name: Configuration de la base de données
   hosts: bdd
   become: true
+  vars_files:
+    - ../group_vars/all/vault.yml
   roles:
     - database
 
 - name: Configuration du serveur de fichiers
   hosts: fichiers
   become: true
+  vars_files:
+    - ../group_vars/all/vault.yml
   roles:
     - fileserver
