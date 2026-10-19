@@ -2,7 +2,6 @@
 *.log
 *.vault_pass
 .vault_pass
-group_vars/all/vault.yml
 *.swp
 .DS_Store
 *.save
